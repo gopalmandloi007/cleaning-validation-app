@@ -133,28 +133,47 @@ if files_ready:
     st.markdown("---")
     st.subheader("Choose Calculation")
 
+    # Use session state to track which calculation is active
+    if 'show_table' not in st.session_state:
+        st.session_state.show_table = None
+
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         if st.button("Calculate MACO"):
-            st.success("### MACO Results")
-            st.write(f"10 ppm: `{maco_10ppm:.4f}` mg")
-            st.write(f"TDD: `{maco_tdd:.4f}` mg")
-            st.write(f"ADE/PDE: `{maco_ade:.4f}` mg")
-            st.write(f"**MACO (Lowest Used):** `{lowest_maco:.4f}` mg")
+            st.session_state.show_table = 'maco'
     with col2:
         if st.button("Calculate Swab Limit"):
-            st.success("### Swab Limit Result")
-            st.write(f"Swab Surface Area Used: `{swab_surface}` m²")
-            st.write(f"Total Equipment Surface (with 20% margin): `{total_surface_area_with_margin:.2f}` m²")
-            st.write(f"**Swab Limit:** `{swab_limit:.6f}` mg")
+            st.session_state.show_table = 'swab'
     with col3:
         if st.button("Calculate Rinse Limit"):
-            st.success("### Rinse Limit per Equipment")
-            st.dataframe(df_rinse_limits[['Eq. Name', 'Eq. ID', 'Surface Area (m2)', 'Rinse Limit (mg)']])
+            st.session_state.show_table = 'rinse'
     with col4:
         if st.button("Calculate Rinse Volume"):
-            st.success("### Rinse Volume per Equipment")
-            st.dataframe(df_rinse_limits[['Eq. Name', 'Eq. ID', 'Surface Area (m2)', 'Rinse Volume (L)', 'Rinse Volume (ml)']])
+            st.session_state.show_table = 'rinsevol'
+
+    # Show full-window tables/results on button click
+    if st.session_state.show_table == 'maco':
+        st.success("### MACO Results")
+        st.write("Full Product Table with Group Assignments and MACO columns:")
+        df_maco = df.copy()
+        df_maco['MACO_10ppm (mg)'] = maco_10ppm
+        df_maco['MACO_TDD (mg)'] = maco_tdd
+        df_maco['MACO_ADE (mg)'] = maco_ade
+        df_maco['MACO_Lowest_Used (mg)'] = lowest_maco
+        st.dataframe(df_maco, use_container_width=True)
+    elif st.session_state.show_table == 'swab':
+        st.success("### Swab Limit Result (Full Product Table)")
+        df_swab = df.copy()
+        df_swab['Swab Surface in M. Sq. Used'] = swab_surface
+        df_swab['Total Equip Surface with 20% margin (m2)'] = total_surface_area_with_margin
+        df_swab['Swab Limit (mg)'] = swab_limit
+        st.dataframe(df_swab, use_container_width=True)
+    elif st.session_state.show_table == 'rinse':
+        st.success("### Rinse Limit per Equipment (Full Table)")
+        st.dataframe(df_rinse_limits, use_container_width=True)
+    elif st.session_state.show_table == 'rinsevol':
+        st.success("### Rinse Volume per Equipment (Full Table)")
+        st.dataframe(df_rinse_limits[['Eq. Name', 'Eq. ID', 'Surface Area (m2)', 'Rinse Volume (L)', 'Rinse Volume (ml)']], use_container_width=True)
 
     with st.expander("See Worst Case Product Selection & Groups", expanded=False):
         st.markdown("**Previous Worst Case (By Highest Rating):**")
@@ -162,6 +181,6 @@ if files_ready:
         st.markdown("**Next Worst Case (By Lowest Min Batch / Max Dose ratio):**")
         st.dataframe(next_worst_case.to_frame().T)
         st.markdown("**Product Group Assignment Table:**")
-        st.dataframe(df.head(20))
+        st.dataframe(df, use_container_width=True)
 else:
     st.info("Please upload all 5 required files to proceed.")
