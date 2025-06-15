@@ -3,14 +3,12 @@ import pandas as pd
 from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.oxml.ns import qn
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 import io
 
 st.set_page_config(page_title="Cleaning Validation App", layout="wide")
 st.title("Cleaning Validation Protocol – MACO, Swab & Rinse Limits")
 
-# ----------- 1. Data Input -----------
 st.markdown("""
 Upload the following files **or use the example files**:
 - product_details.xlsx
@@ -52,9 +50,13 @@ if files_ready:
     df_equip = read_excel_or_none(uploaded_equips)
     df_amv = read_excel_or_none(uploaded_amv)
     df_solclean = read_excel_or_none(uploaded_solclean)
-    templates = pd.read_excel(uploaded_criteria, sheet_name=None)
+    templates = None
+    try:
+        templates = pd.read_excel(uploaded_criteria, sheet_name=None)
+    except Exception as e:
+        st.error(f"Error loading {uploaded_criteria}: {e}")
 
-    if None in [df, df_equip, df_amv, df_solclean, templates]:
+    if any(x is None for x in [df, df_equip, df_amv, df_solclean, templates]):
         st.stop()
 
     solubility_template = templates['Solubility']
