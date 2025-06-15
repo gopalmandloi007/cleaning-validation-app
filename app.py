@@ -1,19 +1,20 @@
 import streamlit as st
 import pandas as pd
+from PIL import Image
+import io
 
 st.set_page_config(page_title="MACO Calculation App By Gopal Mandloi", layout="wide")
 st.markdown("<h1 style='text-align: center; color: #2E8B57;'>MACO Calculation App By Gopal Mandloi</h1>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center;'>"
+            "<img src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>"
+            "<img src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>"
+            "<img src='https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>"
+            "</div>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: #444;'>A one-stop solution for MACO, Swab Limit, and Rinse Limit calculations in cleaning validation</h4>", unsafe_allow_html=True)
 
-st.markdown("""
-Upload your files or use example files:
+st.markdown("### View Final Results")
 
-- product_details.xlsx
-- analytical_method_validation.xlsx
-- solubility_cleaning.xlsx
-- equipment_details.xlsx
-- rating_criteria.xlsx
-""")
-
+# --- Data upload section ---
 mode = st.radio(
     "How do you want to provide data?",
     ("Use example files from repo", "Upload my own files")
@@ -26,6 +27,7 @@ def read_excel_or_none(f, **kwargs):
         st.error(f"Error loading file: {e}")
         return None
 
+# --- File uploaders or use example files ---
 if mode == "Upload my own files":
     uploaded_details = st.file_uploader("Product Details", type=["xlsx"])
     uploaded_amv = st.file_uploader("Analytical Method Validation", type=["xlsx"])
@@ -165,5 +167,99 @@ if files_ready:
             st.success("**Rinse Limit & Volume per Equipment**")
             st.dataframe(df_rinse_limits, use_container_width=True)
 
-else:
-    st.info("Please upload all 5 required files to proceed.")
+# --- INSTRUCTIONS & BLANK TEMPLATE DOWNLOAD SECTION ---
+st.markdown("---")
+st.markdown("<h4 style='color:#2E8B57;'>How to use this App (Procedure):</h4>", unsafe_allow_html=True)
+st.markdown("""
+1. **Download Blank Templates** (button below)
+2. **Fill your data** in the blank templates (do not change column names)
+3. **Upload your filled Excel files above**
+4. **Click any result button above** to see your calculation results!
+
+**If you use your own files, make sure column names and sheet names match the templates.**
+""")
+# ---- Provide blank templates for download ----
+
+def blank_template_product_details():
+    df = pd.DataFrame({
+        "Product Name": [],
+        "Solubility": [],
+        "Min Dose (mg)": [],
+        "Max Dose (mg)": [],
+        "ADE/PDE (µg/day)": [],
+        "Hardest To Clean": [],
+        "Min Batch Size (kg)": [],
+        "Swab Recovery %": [],
+        "LOD in ppm": [],
+        "LOQ in ppm": [],
+        "Swab Dilution in ml as per AMV": [],
+        "Swab Surface in M. Sq.": []
+    })
+    return df
+
+def blank_template_equipment_details():
+    df = pd.DataFrame({
+        "Eq. Name": [],
+        "Eq. ID": [],
+        "Product contact Surface Area (m2)": [],
+        "Used for": [],
+        "Cleaning   Procedure No.": []
+    })
+    return df
+
+def blank_template_solubility():
+    df = pd.DataFrame({
+        "Description": [],
+        "Group": []
+    })
+    return df
+
+def blank_template_dose():
+    df = pd.DataFrame({
+        "Min": [],
+        "Max": [],
+        "Group": []
+    })
+    return df
+
+def blank_template_toxicity():
+    df = pd.DataFrame({
+        "Min": [],
+        "Max": [],
+        "Group": []
+    })
+    return df
+
+def blank_template_cleaning():
+    df = pd.DataFrame({
+        "Description": [],
+        "Group": []
+    })
+    return df
+
+def to_excel_download(df, filename, sheet_name='Sheet1'):
+    towrite = io.BytesIO()
+    with pd.ExcelWriter(towrite, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name=sheet_name)
+    towrite.seek(0)
+    return st.download_button(
+        label=f"Download {filename}",
+        data=towrite,
+        file_name=filename,
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+with st.expander("⬇️ Download Blank Templates", expanded=False):
+    st.markdown("Download each template, fill your data, and upload above. **Do not change the column names or sheet names!**")
+    to_excel_download(blank_template_product_details(), "product_details.xlsx", "Product Details")
+    to_excel_download(blank_template_equipment_details(), "equipment_details.xlsx", "Equipment Details")
+    to_excel_download(blank_template_solubility(), "solubility_cleaning.xlsx", "Solubility")
+    to_excel_download(blank_template_dose(), "rating_criteria.xlsx", "Dose")
+    to_excel_download(blank_template_toxicity(), "rating_criteria.xlsx", "Toxicity")
+    to_excel_download(blank_template_cleaning(), "rating_criteria.xlsx", "Cleaning")
+
+st.markdown("""
+**Common Issues:**
+- If you get a column/sheet name error, please check your Excel file and use the blank template for reference.
+- All files must be in `.xlsx` format.
+""")
