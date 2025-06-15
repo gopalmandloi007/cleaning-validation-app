@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Cleaning Validation Calculator", layout="wide")
-st.title("Cleaning Validation Calculator")
+st.set_page_config(page_title="Cleaning Validation Results", layout="wide")
+st.title("Cleaning Validation: Final Results")
 
 st.markdown("""
 Upload your files or use example files:
+
 - product_details.xlsx
 - analytical_method_validation.xlsx
 - solubility_cleaning.xlsx
@@ -57,7 +58,7 @@ if files_ready:
     toxicity_template = templates['Toxicity']
     cleaning_template = templates['Cleaning']
 
-    # Group assignment functions
+    # Assign groups
     def assign_solubility_group(sol, template):
         if pd.isna(sol): return None
         sol = str(sol).strip().lower()
@@ -94,7 +95,7 @@ if files_ready:
     )
     df['BatchSize_Dose_Ratio'] = df['Min Batch Size (kg)'] / df['Max Dose (mg)']
 
-    # Worst cases
+    # Calculations
     prev_worst_case = df.loc[df['Worst_Case_Rating'].idxmax()]
     next_worst_case = df.loc[df['BatchSize_Dose_Ratio'].idxmin()]
     min_batch_next_kg = next_worst_case['Min Batch Size (kg)']
@@ -113,6 +114,7 @@ if files_ready:
     swab_surface = df['Swab Surface in M. Sq.'].iloc[0]
     swab_limit = lowest_maco * swab_surface / total_surface_area_with_margin
 
+    # Rinse limit & volume per equipment
     rinse_limits = []
     for idx, row in df_equip.iterrows():
         eq_surface = row['Product contact Surface Area (m2)']
@@ -129,40 +131,39 @@ if files_ready:
     df_rinse_limits = pd.DataFrame(rinse_limits)
 
     st.markdown("---")
-    st.subheader("Final Calculation Summary")
+    st.subheader("View Results")
 
-    if st.button("Show Final Calculation Summary"):
-        st.info(f"""
-        **Previous worst case product:** {prev_worst_case['Product Name']}
-        - Min dose: {min_dose_prev_mg} mg
-        - Max dose: {prev_worst_case['Max Dose (mg)']} mg
-        - ADE/PDE: {ade_prev_ug} µg/day
+    col1, col2, col3 = st.columns([1,1,1])
+    with col1:
+        if st.button("📦 Previous Worst Case Product"):
+            st.success(f"Previous Worst Case Product: {prev_worst_case['Product Name']}")
+            st.write(f"Min Dose: {prev_worst_case['Min Dose (mg)']} mg")
+            st.write(f"Max Dose: {prev_worst_case['Max Dose (mg)']} mg")
+            st.write(f"ADE/PDE: {prev_worst_case['ADE/PDE (µg/day)']} µg/day")
+    with col2:
+        if st.button("🚚 Next Worst Case Product"):
+            st.success(f"Next Worst Case Product: {next_worst_case['Product Name']}")
+            st.write(f"Min Batch Size: {next_worst_case['Min Batch Size (kg)']} kg")
+            st.write(f"Max Dose: {next_worst_case['Max Dose (mg)']} mg")
+    with col3:
+        if st.button("🛑 MACO Calculations"):
+            st.success("MACO Results")
+            st.write(f"10 ppm MACO: {maco_10ppm:.4f} mg")
+            st.write(f"TDD MACO: {maco_tdd:.4f} mg")
+            st.write(f"ADE/PDE MACO: {maco_ade:.4f} mg")
+            st.write(f"**Lowest MACO (used): {lowest_maco:.4f} mg**")
 
-        **Next worst case product:** {next_worst_case['Product Name']}
-        - Min batch size: {min_batch_next_kg} kg
-        - Max dose: {max_dose_next_mg} mg
+    col4, col5 = st.columns([1,1])
+    with col4:
+        if st.button("🧪 Swab Limit"):
+            st.success("Swab Limit")
+            st.write(f"Swab Surface Used: {swab_surface} m²")
+            st.write(f"Total Equip Surface (with 20% margin): {total_surface_area_with_margin:.2f} m²")
+            st.write(f"**Swab Limit: {swab_limit:.6f} mg**")
+    with col5:
+        if st.button("💧 Rinse Limit & Volume (Equipment-wise)"):
+            st.success("Rinse Limit & Volume per Equipment")
+            st.dataframe(df_rinse_limits, use_container_width=True)
 
-        **MACO Calculations:**
-        1. 10 ppm MACO: {maco_10ppm:.4f} mg
-        2. TDD MACO: {maco_tdd:.4f} mg
-        3. ADE/PDE MACO: {maco_ade:.4f} mg
-
-        **Lowest MACO used:** {lowest_maco:.4f} mg
-
-        **Swab Limit:** {swab_limit:.6f} mg (using swab surface {swab_surface} m² and total equipment surface with 20% margin {total_surface_area_with_margin:.2f} m²)
-
-        **Rinse Limit and Rinse Volume per equipment are shown below.**
-        """)
-
-        st.markdown("**Rinse Limit and Rinse Volume (Equipment-wise):**")
-        st.dataframe(df_rinse_limits, use_container_width=True)
-
-    with st.expander("See Worst Case Product Selection & Groups", expanded=False):
-        st.markdown("**Previous Worst Case (By Highest Rating):**")
-        st.dataframe(prev_worst_case.to_frame().T)
-        st.markdown("**Next Worst Case (By Lowest Min Batch / Max Dose ratio):**")
-        st.dataframe(next_worst_case.to_frame().T)
-        st.markdown("**Product Group Assignment Table:**")
-        st.dataframe(df, use_container_width=True)
 else:
     st.info("Please upload all 5 required files to proceed.")
