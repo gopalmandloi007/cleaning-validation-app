@@ -40,16 +40,22 @@ if mode == "Upload my own files":
     equipment_details_file = st.file_uploader("Upload Equipment Details file", type=["xlsx"], key="equip")
     rating_criteria_file = st.file_uploader("Upload Rating Criteria file", type=["xlsx"], key="rating")
 else:
-    # Use files from repo directory
-    product_details_file = "product_details.xlsx"
-    amv_file = "analytical_method_validation.xlsx"
-    solubility_cleaning_file = "solubility_cleaning.xlsx"
-    equipment_details_file = "equipment_details.xlsx"
-    rating_criteria_file = "rating_criteria.xlsx"
+    # Use files from repo directory, but check if they exist!
+    def check_file(name):
+        if not os.path.exists(name):
+            st.error(f"File `{name}` is missing from your repo! Please add it or upload your own files.")
+            return None
+        return name
 
-files_ready = (
-    product_details_file and amv_file and solubility_cleaning_file and equipment_details_file and rating_criteria_file
-)
+    product_details_file = check_file("product_details.xlsx")
+    amv_file = check_file("analytical_method_validation.xlsx")
+    solubility_cleaning_file = check_file("solubility_cleaning.xlsx")
+    equipment_details_file = check_file("equipment_details.xlsx")
+    rating_criteria_file = check_file("rating_criteria.xlsx")
+
+files_ready = all([
+    product_details_file, amv_file, solubility_cleaning_file, equipment_details_file, rating_criteria_file
+])
 
 if files_ready:
     # Try to read each file, handle all errors gracefully
