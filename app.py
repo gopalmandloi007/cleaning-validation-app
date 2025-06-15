@@ -14,6 +14,20 @@ st.markdown("""
 - `rating_criteria.xlsx`
 """)
 
+def safe_read_excel(path_or_buffer, **kwargs):
+    try:
+        df = pd.read_excel(path_or_buffer, **kwargs)
+        return df
+    except FileNotFoundError:
+        st.error(f"File not found: `{path_or_buffer}`. Please make sure the file exists in your repo or upload it.")
+        return None
+    except ValueError as ve:
+        st.error(f"ValueError while reading `{path_or_buffer}`: {ve}")
+        return None
+    except Exception as e:
+        st.error(f"Error reading `{path_or_buffer}`: {e}")
+        return None
+
 mode = st.radio(
     "How do you want to provide data?",
     ("Use example files from repo", "Upload my own files")
@@ -33,18 +47,21 @@ else:
     equipment_details_file = "equipment_details.xlsx"
     rating_criteria_file = "rating_criteria.xlsx"
 
-# Check if all files are present/selected
 files_ready = (
     product_details_file and amv_file and solubility_cleaning_file and equipment_details_file and rating_criteria_file
 )
 
 if files_ready:
-    # Load dataframes
-    df_product = pd.read_excel(product_details_file)
-    df_amv = pd.read_excel(amv_file)
-    df_sol_clean = pd.read_excel(solubility_cleaning_file)
-    df_equip = pd.read_excel(equipment_details_file)
-    df_criteria = pd.read_excel(rating_criteria_file, sheet_name=None)
+    # Try to read each file, handle all errors gracefully
+    df_product = safe_read_excel(product_details_file)
+    df_amv = safe_read_excel(amv_file)
+    df_sol_clean = safe_read_excel(solubility_cleaning_file)
+    df_equip = safe_read_excel(equipment_details_file)
+    df_criteria = safe_read_excel(rating_criteria_file, sheet_name=None)
+
+    # Check that all DataFrames loaded successfully
+    if None in [df_product, df_amv, df_sol_clean, df_equip, df_criteria]:
+        st.stop()
 
     st.success("All files loaded successfully! Here are samples from each:")
 
