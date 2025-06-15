@@ -1,16 +1,22 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
 import io
 
 st.set_page_config(page_title="MACO Calculation App By Gopal Mandloi", layout="wide")
-st.markdown("<h1 style='text-align: center; color: #2E8B57;'>MACO Calculation App By Gopal Mandloi</h1>", unsafe_allow_html=True)
-st.markdown("<div style='text-align: center;'>"
-            "<img src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>"
-            "<img src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>"
-            "<img src='https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>"
-            "</div>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center; color: #444;'>A one-stop solution for MACO, Swab Limit, and Rinse Limit calculations in cleaning validation</h4>", unsafe_allow_html=True)
+
+# --- APP NAME AND BANNER ---
+st.markdown(
+    """
+    <h1 style='text-align: center; color: #2E8B57;'>MACO Calculation App By Gopal Mandloi</h1>
+    <div style='text-align: center;'>
+        <img src='https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>
+        <img src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>
+        <img src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=800&h=200&q=80' width='180' style='margin:10px'/>
+    </div>
+    <h4 style='text-align: center; color: #444;'>A one-stop solution for MACO, Swab Limit, and Rinse Limit calculations in cleaning validation</h4>
+    """,
+    unsafe_allow_html=True
+)
 
 st.markdown("### View Final Results")
 
@@ -168,6 +174,7 @@ if files_ready:
             st.dataframe(df_rinse_limits, use_container_width=True)
 
 # --- INSTRUCTIONS & BLANK TEMPLATE DOWNLOAD SECTION ---
+
 st.markdown("---")
 st.markdown("<h4 style='color:#2E8B57;'>How to use this App (Procedure):</h4>", unsafe_allow_html=True)
 st.markdown("""
@@ -178,7 +185,6 @@ st.markdown("""
 
 **If you use your own files, make sure column names and sheet names match the templates.**
 """)
-# ---- Provide blank templates for download ----
 
 def blank_template_product_details():
     df = pd.DataFrame({
@@ -237,29 +243,57 @@ def blank_template_cleaning():
     })
     return df
 
-def to_excel_download(df, filename, sheet_name='Sheet1'):
+def blank_rating_criteria():
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        blank_template_solubility().to_excel(writer, index=False, sheet_name='Solubility')
+        blank_template_dose().to_excel(writer, index=False, sheet_name='Dose')
+        blank_template_toxicity().to_excel(writer, index=False, sheet_name='Toxicity')
+        blank_template_cleaning().to_excel(writer, index=False, sheet_name='Cleaning')
+    output.seek(0)
+    return output
+
+def to_excel_download(df, filename, sheet_name='Sheet1', key=None):
     towrite = io.BytesIO()
     with pd.ExcelWriter(towrite, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name=sheet_name)
     towrite.seek(0)
     return st.download_button(
-        label=f"Download {filename}",
+        label=f"Download {filename} ({sheet_name})",
         data=towrite,
         file_name=filename,
-        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        key=key
     )
 
 with st.expander("⬇️ Download Blank Templates", expanded=False):
     st.markdown("Download each template, fill your data, and upload above. **Do not change the column names or sheet names!**")
-    to_excel_download(blank_template_product_details(), "product_details.xlsx", "Product Details")
-    to_excel_download(blank_template_equipment_details(), "equipment_details.xlsx", "Equipment Details")
-    to_excel_download(blank_template_solubility(), "solubility_cleaning.xlsx", "Solubility")
-    to_excel_download(blank_template_dose(), "rating_criteria.xlsx", "Dose")
-    to_excel_download(blank_template_toxicity(), "rating_criteria.xlsx", "Toxicity")
-    to_excel_download(blank_template_cleaning(), "rating_criteria.xlsx", "Cleaning")
+    to_excel_download(blank_template_product_details(), "product_details.xlsx", "Product Details", key="prod")
+    to_excel_download(blank_template_equipment_details(), "equipment_details.xlsx", "Equipment Details", key="equip")
+    st.download_button(
+        label="Download rating_criteria.xlsx (all 4 sheets)",
+        data=blank_rating_criteria(),
+        file_name="rating_criteria.xlsx",
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        key="rating"
+    )
 
 st.markdown("""
 **Common Issues:**
 - If you get a column/sheet name error, please check your Excel file and use the blank template for reference.
 - All files must be in `.xlsx` format.
 """)
+
+st.markdown("""
+---
+<div style="border:2px solid #FFA500; border-radius:8px; padding:12px; background-color:#FFF8E1;">
+<b>Disclaimer:</b><br>
+This app is <b>under development</b> and may show wrong calculations.<br>
+Please <b>always calculate manually and match both the results</b>.<br>
+<b>I am not responsible for any incorrect calculation.</b><br><br>
+If you find/observe any error while using the app, inform me:<br>
+<b>Gopal Mandloi</b> &nbsp;|&nbsp; WhatsApp/Mobile: <b>9827276040</b><br>
+This app is developed based on <b>OSD (Oral Solid Dosage Form & API)</b> and <b>not for other formulation</b>.<br>
+If you want to develop an app, contact me on my mobile.
+</div>
+""", unsafe_allow_html=True)
