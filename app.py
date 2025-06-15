@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Cleaning Validation Results", layout="wide")
-st.title("Cleaning Validation: Final Results")
+st.set_page_config(page_title="MACO Calculation App By Gopal Mandloi", layout="wide")
+st.markdown("<h1 style='text-align: center; color: #2E8B57;'>MACO Calculation App By Gopal Mandloi</h1>", unsafe_allow_html=True)
 
 st.markdown("""
 Upload your files or use example files:
@@ -131,38 +131,38 @@ if files_ready:
     df_rinse_limits = pd.DataFrame(rinse_limits)
 
     st.markdown("---")
-    st.subheader("View Results")
+    st.subheader("View Final Results")
 
-    col1, col2, col3 = st.columns([1,1,1])
+    col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
-        if st.button("📦 Previous Worst Case Product"):
-            st.success(f"Previous Worst Case Product: {prev_worst_case['Product Name']}")
+        if st.button("📦 Previous Worst Case Product", use_container_width=True):
+            st.success(f"**Previous Worst Case Product**: {prev_worst_case['Product Name']}")
             st.write(f"Min Dose: {prev_worst_case['Min Dose (mg)']} mg")
             st.write(f"Max Dose: {prev_worst_case['Max Dose (mg)']} mg")
             st.write(f"ADE/PDE: {prev_worst_case['ADE/PDE (µg/day)']} µg/day")
     with col2:
-        if st.button("🚚 Next Worst Case Product"):
-            st.success(f"Next Worst Case Product: {next_worst_case['Product Name']}")
+        if st.button("🚚 Next Worst Case Product", use_container_width=True):
+            st.success(f"**Next Worst Case Product**: {next_worst_case['Product Name']}")
             st.write(f"Min Batch Size: {next_worst_case['Min Batch Size (kg)']} kg")
             st.write(f"Max Dose: {next_worst_case['Max Dose (mg)']} mg")
     with col3:
-        if st.button("🛑 MACO Calculations"):
-            st.success("MACO Results")
+        if st.button("🛑 MACO Calculations", use_container_width=True):
+            st.success("**MACO Results**")
             st.write(f"10 ppm MACO: {maco_10ppm:.4f} mg")
             st.write(f"TDD MACO: {maco_tdd:.4f} mg")
             st.write(f"ADE/PDE MACO: {maco_ade:.4f} mg")
             st.write(f"**Lowest MACO (used): {lowest_maco:.4f} mg**")
 
-    col4, col5 = st.columns([1,1])
+    col4, col5 = st.columns([1, 1])
     with col4:
-        if st.button("🧪 Swab Limit"):
-            st.success("Swab Limit")
+        if st.button("🧪 Swab Limit", use_container_width=True):
+            st.success("**Swab Limit**")
             st.write(f"Swab Surface Used: {swab_surface} m²")
             st.write(f"Total Equip Surface (with 20% margin): {total_surface_area_with_margin:.2f} m²")
             st.write(f"**Swab Limit: {swab_limit:.6f} mg**")
     with col5:
-        if st.button("💧 Rinse Limit & Volume (Equipment-wise)"):
-            st.success("Rinse Limit & Volume per Equipment")
+        if st.button("💧 Rinse Limit & Volume (Equipment-wise)", use_container_width=True):
+            st.success("**Rinse Limit & Volume per Equipment**")
             st.dataframe(df_rinse_limits, use_container_width=True)
 
 else:
