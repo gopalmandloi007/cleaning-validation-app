@@ -4,7 +4,7 @@ import io
 
 # --- WELCOME & DISCLAIMER MESSAGE ---
 WELCOME_MESSAGE = """
-🚧 **Cleaning Validation APP by Gopal Mandloi**This App is Under Development — Please Read!** 🚧
+🚧 **Cleaning Validation APP by _Gopal Mandloi **This App is Under Development — Please Read!** 🚧
 
 Dear Friends,
 
