@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import io
 
-# --- WELCOME & DISCLAIMER MESSAGE (Markdown for compatibility) ---
+# --- WELCOME & DISCLAIMER MESSAGE (Pure Markdown, no HTML) ---
 WELCOME_MESSAGE = """
 🚧 **Cleaning Validation APP by _Gopal Mandloi_** 🚧
 
@@ -212,17 +212,15 @@ if files_ready:
 
 st.markdown("---")
 st.markdown("""
-<div style='background: linear-gradient(90deg,#E3F0FF 60%,#F7E3FF); border-radius:8px; padding:16px 20px 12px 20px; margin-bottom:10px; border-left: 8px solid #1565c0;'>
-<h4 style='color:#1565c0;margin-top:0;'>📝 How to use this App (Procedure):</h4>
-<ol style='color:#222; font-size: 16px;'>
-  <li><b>Download Blank Templates</b> (button below)</li>
-  <li><b>Fill your data</b> in the blank templates (do not change column names)</li>
-  <li><b>Upload your filled Excel files above</b></li>
-  <li><b>Click any result button above</b> to see your calculation results!</li>
-</ol>
-<span style='color:#e65100'><b>If you use your own files, make sure column names and sheet names match the templates.</b></span>
-</div>
-""", unsafe_allow_html=True)
+**How to use this App (Procedure):**
+
+1. **Download Blank Templates** (button below)
+2. **Fill your data** in the blank templates (do not change column names)
+3. **Upload your filled Excel files above**
+4. **Click any result button above** to see your calculation results!
+
+:warning: **If you use your own files, make sure column names and sheet names match the templates.**
+""")
 
 def blank_template_product_details():
     df = pd.DataFrame({
@@ -320,26 +318,18 @@ st.markdown("""
 **Common Issues:**
 - If you get a column/sheet name error, please check your Excel file and use the blank template for reference.
 - All files must be in `.xlsx` format.
-""")
 
-st.markdown("""
 ---
-<div style="
-    border:2px solid #FFA500;
-    border-radius:10px;
-    padding:18px;
-    background: linear-gradient(90deg, #FFF8E1 60%, #FFE0B2);
-    box-shadow: 2px 2px 12px #FFECB3;
-    font-size:16px;
-">
-    <span style="font-size:22px; color:#FF6F00;">⚠️ Disclaimer</span><br><br>
-    <span style="color:#D84315;"><b>This app is <u>under development</u> and may show wrong calculations.</b></span><br>
-    Please <b>always calculate manually and match both the results</b>.<br>
-    <b style="color:#C62828;">I am not responsible for any incorrect calculation.</b><br><br>
-    <span style="color:#1976D2;">If you find/observe any error while using the app, inform me:</span><br>
-    <b>Gopal Mandloi</b> &nbsp;|&nbsp;
-    <span style="color:#388E3C; font-weight:bold;">WhatsApp/Mobile: 9827276040</span><br>
-    <span style="color:#6D4C41;">This app is developed based on <b>OSD (Oral Solid Dosage Form & API)</b> and <b>not for other formulation</b>.</span><br>
-    <span style="color:#00838F;">If you want to develop an app, contact me on my mobile.</span>
-</div>
-""", unsafe_allow_html=True)
+
+:warning: **Disclaimer**
+
+**This app is _under development_ and may show wrong calculations.  
+Always calculate manually and match both the results.  
+I am not responsible for any incorrect calculation.**
+
+If you find/observe any error while using the app, inform me:  
+**Gopal Mandloi** | WhatsApp/Mobile: 9827276040
+
+This app is developed based on **OSD (Oral Solid Dosage Form & API)** and **not for other formulation**.  
+If you want to develop an app, contact me on my mobile.
+""")
